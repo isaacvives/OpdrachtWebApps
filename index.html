@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Bar-code scanner</h1>
+    <fieldset>
+        <legend>Select camera</legend>                    
+        <select id="selectMediaDevice"></select>
+    </fieldset>
+
+    <fieldset>
+        <video id="videoStream"></video>
+    </fieldset>
+
+    <fieldset>
+        <label for="barcodeResult">Barcode Result:</label>
+        <input type="text" id="barcodeResult" readonly>
+    </fieldset>
+
+    <fieldset>
+        <legend>Book Information</legend>
+        <div id="bookInfo"></div>
+    </fieldset>
+
+    <script src="scripts/quagga.min.js"></script>
+    <script src="scripts/script.js"></script>
+</body>
+</html>
