@@ -1,32 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <title>Document</title>
 </head>
+
 <body>
-    <h1>Bar-code scanner</h1>
-    <fieldset>
-        <legend>Select camera</legend>                    
-        <select id="selectMediaDevice"></select>
-    </fieldset>
-
-    <fieldset>
-        <video id="videoStream"></video>
-    </fieldset>
-
-    <fieldset>
-        <label for="barcodeResult">Barcode Result:</label>
-        <input type="text" id="barcodeResult" readonly>
-    </fieldset>
-
-    <fieldset>
-        <legend>Book Information</legend>
-        <div id="bookInfo"></div>
-    </fieldset>
-
-    <script src="scripts/quagga.min.js"></script>
-    <script src="scripts/script.js"></script>
+    <div class="container">
+        <div class="fixed-action-btn">
+            <a class="btn-floating btn-large red" href="add_book.html">
+                <i class="large material-icons">add</i>
+            </a>
+        </div>
+    </div>
+    <script src="scripts/index.js"></script>
 </body>
+
 </html>

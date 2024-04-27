@@ -4,6 +4,9 @@ var _mediaStream = null;
 window.addEventListener('load', function () {
     console.log("Loaded.");
 
+    var elems = document.querySelectorAll('select');
+    var instances = M.FormSelect.init(elems);
+
     // Service worker registeren.
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./service-worker.js')
@@ -27,14 +30,11 @@ window.addEventListener('load', function () {
                 console.log(devices);
 
                 // Alle devices in de selection tonen.    
-                var option = document.createElement('option');
-                option.textContent = "None";
-                option.setAttribute('data-id', "None");
-                selector.appendChild(option);
                 for (var i = 0; i < devices.length; i++) {
                     if (devices[i].kind == "videoinput") {
                         option = document.createElement('option');
                         option.textContent = devices[i].label + " (" + devices[i].kind + ")";
+                        option.setAttribute('value', (i).toString())
                         option.setAttribute('data-id', devices[i].deviceId);
                         selector.appendChild(option);
                         console.log("Single option: ", option);
@@ -96,13 +96,14 @@ window.addEventListener('load', function () {
                             // Bar-code detectie
                             Quagga.onDetected(function (result) {
                                 var code = result.codeResult.code;
-                                document.getElementById("barcodeResult").value = code;
+                                var codeText = "Detected barcode: " + code;
+                                document.getElementById("barcodeResult").textContent = codeText;
                                 console.log("Barcode detected: ", code);
-                            
+
                                 // API van openlibrary
                                 var isbn = "ISBN:" + code;
                                 var apiUrl = "https://openlibrary.org/api/books?bibkeys=" + isbn + "&jscmd=details&format=json";
-                            
+
                                 fetch(apiUrl)
                                     .then(response => response.json())
                                     .then(data => {
@@ -112,20 +113,33 @@ window.addEventListener('load', function () {
                                             var author = bookInfo.details.authors[0].name;
                                             var publishDate = bookInfo.details.publish_date;
                                             var publisher = bookInfo.details.publishers[0];
-                            
+                                            var thumbnail = bookInfo.thumbnail_url;
+
                                             var infoText = "Title: " + title + "\n";
                                             infoText += "Author: " + author + "\n";
                                             infoText += "Publish Date: " + publishDate + "\n";
                                             infoText += "Publisher: " + publisher;
-                            
-                                            document.getElementById("bookInfo").textContent = infoText;
+                                            img = document.createElement('img');
+                                            img.setAttribute('src', thumbnail);
+
+                                            document.getElementById("title").textContent = title;
+                                            document.getElementById("author").textContent = author;
+                                            document.getElementById("date").textContent = publishDate;
+                                            document.getElementById("publisher").textContent = publisher;
+                                            var resultImg = document.getElementById("resultImg");
+                                            // Dit werkt niet, er verschijnt geen foto
+                                            while (resultImg.firstChild) {
+                                                resultImg.removeChild(myNode.lastChild);
+                                            }
+                                            resultImg.appendChild(img);
+
                                         } else {
                                             document.getElementById("bookInfo").textContent = "Book information not found.";
                                         }
                                     })
                                     .catch(error => console.error("Error fetching book info:", error));
                             });
-                            
+
                         };
                     })
                     .catch(error => console.log(error));
@@ -136,3 +150,4 @@ window.addEventListener('load', function () {
         alert('No media devices support in this browser.');
     }
 });
+

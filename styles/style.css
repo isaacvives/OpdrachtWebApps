@@ -1,0 +1,8 @@
+.videoContainer {
+    text-align: center;
+}
+
+#videoStream {
+    max-width: 100%; /* Om ervoor te zorgen dat de video niet groter wordt dan de container */
+    max-height: 100%; /* Om ervoor te zorgen dat de video niet groter wordt dan de container */
+}

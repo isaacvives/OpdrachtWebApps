@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" href="styles/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col l8 offset-l2 m12 s12">
+                <h1>Add Book</h1>
+            </div>
+            <div class="col l8 offset-l2 m12 s12">
+                <label>Select your camera</label>
+                <select class="browser-default" id="selectMediaDevice">
+                    <option data-id="None" value="">Choose your option</option>
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col l12 m12 s12">
+                <div class="videoContainer">
+                    <video id="videoStream"></video>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col offset-l2 l8 m12 s12">
+                <div id="barcodeResult"></div>
+            </div>
+            <div class="col l4 m6 s6" id="resultImg">
+            </div>
+            <div class="col l4 offset-l2 m6 s6">
+                <ul>
+                    <li id="title"></li>
+                    <li id="author"></li>
+                    <li id="date"></li>
+                    <li id="publisher"></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script src="scripts/quagga.min.js"></script>
+    <script src="scripts/script.js"></script>
+</body>
+
+</html>
