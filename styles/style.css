@@ -6,3 +6,11 @@
     max-width: 100%; /* Om ervoor te zorgen dat de video niet groter wordt dan de container */
     max-height: 100%; /* Om ervoor te zorgen dat de video niet groter wordt dan de container */
 }
+
+#bookThumbnail {
+    width: 170px;
+}
+
+#preview_img {
+    width: 170px;
+}

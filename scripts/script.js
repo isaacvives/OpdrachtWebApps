@@ -1,4 +1,12 @@
 var _mediaStream = null;
+var info = {};
+var objectStore;
+const dbName = "bookDatabase";
+const storeName = "books";
+var code;
+var fetched = false;
+var lastDetectionTime = 0;
+var detectionInterval = 500; // Tijd in milliseconden tussen detecties
 
 // Indien pagina geladen...
 window.addEventListener('load', function () {
@@ -19,6 +27,30 @@ window.addEventListener('load', function () {
     else {
         alert('No service worker support in this browser.');
     }
+
+    // IndexedDB
+
+    const request = indexedDB.open(dbName, 2);
+
+    request.onerror = (event) => {
+        console.error("Fout bij het openen van de database", event.target.error);
+    };
+
+    request.onsuccess = function (event) {
+        db = event.target.result;
+        console.log("Database geopend.");
+    };
+
+    request.onupgradeneeded = function (event) {
+        db = event.target.result;
+        objectStore = db.createObjectStore(storeName, { keyPath: "isbn" });
+        objectStore.createIndex("title", "title", { unique: false });
+        objectStore.createIndex("author", "author", { unique: false });
+        objectStore.createIndex("publishDate", "publishDate", { unique: false });
+        objectStore.createIndex("publisher", "publisher", { unique: false });
+        objectStore.createIndex("thumbnail", "thumbnail", { unique: false });
+        objectStore.createIndex("comment", "comment", { unique: false });
+    };
 
     // Zoek naar media devices.
     if ('mediaDevices' in navigator) {
@@ -93,51 +125,38 @@ window.addEventListener('load', function () {
                                 Quagga.start();
                             });
 
-                            // Bar-code detectie
+                            // Barcode detectie
                             Quagga.onDetected(function (result) {
-                                var code = result.codeResult.code;
-                                var codeText = "Detected barcode: " + code;
-                                document.getElementById("barcodeResult").textContent = codeText;
-                                console.log("Barcode detected: ", code);
-
-                                // API van openlibrary
-                                var isbn = "ISBN:" + code;
-                                var apiUrl = "https://openlibrary.org/api/books?bibkeys=" + isbn + "&jscmd=details&format=json";
-
-                                fetch(apiUrl)
-                                    .then(response => response.json())
-                                    .then(data => {
-                                        var bookInfo = data[isbn];
-                                        if (bookInfo) {
-                                            var title = bookInfo.details.title;
-                                            var author = bookInfo.details.authors[0].name;
-                                            var publishDate = bookInfo.details.publish_date;
-                                            var publisher = bookInfo.details.publishers[0];
-                                            var thumbnail = bookInfo.thumbnail_url;
-
-                                            var infoText = "Title: " + title + "\n";
-                                            infoText += "Author: " + author + "\n";
-                                            infoText += "Publish Date: " + publishDate + "\n";
-                                            infoText += "Publisher: " + publisher;
-                                            img = document.createElement('img');
-                                            img.setAttribute('src', thumbnail);
-
-                                            document.getElementById("title").textContent = title;
-                                            document.getElementById("author").textContent = author;
-                                            document.getElementById("date").textContent = publishDate;
-                                            document.getElementById("publisher").textContent = publisher;
-                                            var resultImg = document.getElementById("resultImg");
-                                            // Dit werkt niet, er verschijnt geen foto
-                                            while (resultImg.firstChild) {
-                                                resultImg.removeChild(myNode.lastChild);
+                                var currentTime = new Date().getTime();
+                                if (currentTime - lastDetectionTime > detectionInterval) {
+                                    code = result.codeResult.code;
+                                    var codeText = "Detected barcode: " + code;
+                                    document.getElementById("barcodeResult").textContent = codeText;
+                                    console.log("Barcode detected: ", code);
+                            
+                                    // API van openlibrary
+                                    var isbn = "ISBN:" + code;
+                                    var apiUrl = "https://openlibrary.org/api/books?bibkeys=" + isbn + "&jscmd=details&format=json";
+                                    if (!fetched) {
+                                        fetch(apiUrl)
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            var bookInfo = data[isbn];
+                                            if (bookInfo) {
+                                                showAndParseBookInfo(bookInfo)
+                                                console.log("Bookinfo successfully fetched")
+                                                fetched = true;
+                                                document.getElementById("saveButton").classList.remove("disabled");
+                            
+                                            } else {
+                                                document.getElementById("saveButton").classList.add("disabled");
                                             }
-                                            resultImg.appendChild(img);
-
-                                        } else {
-                                            document.getElementById("bookInfo").textContent = "Book information not found.";
-                                        }
-                                    })
-                                    .catch(error => console.error("Error fetching book info:", error));
+                                        })
+                                        .catch(error => console.error("Error fetching book info:", error));
+                                    }
+                            
+                                    lastDetectionTime = currentTime; // Bijwerken van de laatste detectietijd
+                                }
                             });
 
                         };
@@ -151,3 +170,65 @@ window.addEventListener('load', function () {
     }
 });
 
+function showAndParseBookInfo(bookInfo) {
+    console.log(bookInfo);
+    // Titel
+    var title = bookInfo.details.title || "Unknown Title";
+    
+    // Auteur
+    var author = "Unknown Author";
+    if (bookInfo.details.authors && bookInfo.details.authors.length > 0) {
+        author = bookInfo.details.authors[0].name || "Unknown Author";
+    }
+    
+    // Publicatiedatum
+    var publishDate = bookInfo.details.publish_date || "Unknown Publish Date";
+    
+    // Uitgever
+    var publisher = "Unknown Publisher";
+    if (bookInfo.details.publishers && bookInfo.details.publishers.length > 0) {
+        publisher = bookInfo.details.publishers[0] || "Unknown Publisher";
+    }
+    
+    // Thumbnail
+    var thumbnail = bookInfo.thumbnail_url || "images/noimage.jpg";
+
+    info["isbn"] = code; // Gedetecteerde barcode gebruiken
+    info["title"] = title;
+    info["author"] = author;
+    info["publishDate"] = publishDate;
+    info["publisher"] = publisher;
+    info["thumbnail"] = thumbnail;
+    info["comment"] = "";
+    console.log("info:");
+    console.log(info);
+    img = document.createElement('img');
+
+    // Voeg de attribute toe maar vraag de "medium" afbeelding op ipv de "small"
+    img.setAttribute('id', "preview_img");
+    img.setAttribute('src', thumbnail.replace("-S", "-M"));
+
+    document.getElementById("title").textContent = title;
+    document.getElementById("author").textContent = author;
+    document.getElementById("date").textContent = publishDate;
+    document.getElementById("publisher").textContent = publisher;
+    var resultImg = document.getElementById("resultImg");
+    while (resultImg.firstChild) {
+        resultImg.removeChild(resultImg.lastChild);
+    }
+    resultImg.appendChild(img);
+}
+
+
+document.getElementById("saveButton").onclick = function () {
+    var transaction = db.transaction([storeName], "readwrite");
+    objectStore = transaction.objectStore(storeName);
+    var request = objectStore.add(info);
+    request.onsuccess = function (event) {
+        console.log("Nieuwe info toegevoegd:", info);
+    };
+    request.onerror = function (event) {
+        console.error("Fout bij het toevoegen van de info:", event.target.error);
+    };
+    window.location.href = "../index.html"
+};
