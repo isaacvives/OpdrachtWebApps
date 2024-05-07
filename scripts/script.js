@@ -133,28 +133,28 @@ window.addEventListener('load', function () {
                                     var codeText = "Detected barcode: " + code;
                                     document.getElementById("barcodeResult").textContent = codeText;
                                     console.log("Barcode detected: ", code);
-                            
+
                                     // API van openlibrary
                                     var isbn = "ISBN:" + code;
                                     var apiUrl = "https://openlibrary.org/api/books?bibkeys=" + isbn + "&jscmd=details&format=json";
                                     if (!fetched) {
                                         fetch(apiUrl)
-                                        .then(response => response.json())
-                                        .then(data => {
-                                            var bookInfo = data[isbn];
-                                            if (bookInfo) {
-                                                showAndParseBookInfo(bookInfo)
-                                                console.log("Bookinfo successfully fetched")
-                                                fetched = true;
-                                                document.getElementById("saveButton").classList.remove("disabled");
-                            
-                                            } else {
-                                                document.getElementById("saveButton").classList.add("disabled");
-                                            }
-                                        })
-                                        .catch(error => console.error("Error fetching book info:", error));
+                                            .then(response => response.json())
+                                            .then(data => {
+                                                var bookInfo = data[isbn];
+                                                if (bookInfo) {
+                                                    showAndParseBookInfo(bookInfo)
+                                                    console.log("Bookinfo successfully fetched")
+                                                    fetched = true;
+                                                    document.getElementById("saveButton").classList.remove("disabled");
+
+                                                } else {
+                                                    document.getElementById("saveButton").classList.add("disabled");
+                                                }
+                                            })
+                                            .catch(error => console.error("Error fetching book info:", error));
                                     }
-                            
+
                                     lastDetectionTime = currentTime; // Bijwerken van de laatste detectietijd
                                 }
                             });
@@ -174,22 +174,22 @@ function showAndParseBookInfo(bookInfo) {
     console.log(bookInfo);
     // Titel
     var title = bookInfo.details.title || "Unknown Title";
-    
+
     // Auteur
     var author = "Unknown Author";
     if (bookInfo.details.authors && bookInfo.details.authors.length > 0) {
         author = bookInfo.details.authors[0].name || "Unknown Author";
     }
-    
+
     // Publicatiedatum
     var publishDate = bookInfo.details.publish_date || "Unknown Publish Date";
-    
+
     // Uitgever
     var publisher = "Unknown Publisher";
     if (bookInfo.details.publishers && bookInfo.details.publishers.length > 0) {
         publisher = bookInfo.details.publishers[0] || "Unknown Publisher";
     }
-    
+
     // Thumbnail
     var thumbnail = bookInfo.thumbnail_url || "images/noimage.jpg";
 
@@ -226,6 +226,16 @@ document.getElementById("saveButton").onclick = function () {
     var request = objectStore.add(info);
     request.onsuccess = function (event) {
         console.log("Nieuwe info toegevoegd:", info);
+        navigator.serviceWorker.getRegistration()
+            .then(registration => {
+                registration.showNotification("Boekenlijst", {
+                    vibrate: [300, 100, 400],
+                    body: "Boek succesvol toegevoegd",
+                    icon: "../images/icons/vives512.png"
+                });
+
+                console.log("Notification was send...");
+            });
     };
     request.onerror = function (event) {
         console.error("Fout bij het toevoegen van de info:", event.target.error);

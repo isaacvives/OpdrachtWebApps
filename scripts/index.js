@@ -7,6 +7,37 @@ document.addEventListener('DOMContentLoaded', function () {
   var elems = document.querySelectorAll('.fixed-action-btn');
   var instances = M.FloatingActionButton.init(elems);
 
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./service-worker.js')
+      .then((registration) => {
+        console.log('Registered: ');
+        console.log(registration);
+      })
+      .catch((err) => console.log(err));
+  }
+  else {
+    alert('No service worker support in this browser.');
+  }
+
+  if (!("Notification" in window))
+    console.log("Notifications not supported in this browser.");
+  else {
+    if (Notification.permission == "granted") {
+      console.log("Permission granted before.");
+    }
+    else {
+      if (Notification.permission != "denied") {
+        Notification.requestPermission().then(permission => {
+          if (permission == "granted") {
+            console.log("Permission granted.");
+          }
+        });
+      }
+      else
+        console.log("Permission denied before...");
+    }
+  }
+
   const request = indexedDB.open(dbName, 2);
 
   request.onerror = (event) => {
@@ -97,31 +128,31 @@ function addComment(isbn) {
 
   const getRequest = objectStore.get(isbn.toString());
 
-  getRequest.onsuccess = function(event) {
+  getRequest.onsuccess = function (event) {
     const book = event.target.result;
     console.log(book);
     book.comment = textin;
     const updateRequest = objectStore.put(book);
 
-    updateRequest.onsuccess = function(event) {
+    updateRequest.onsuccess = function (event) {
       console.log("Opmerking toegevoegd aan het boek met ISBN", isbn);
       window.location.reload();
     };
 
-    updateRequest.onerror = function(event) {
+    updateRequest.onerror = function (event) {
       console.error("Fout bij het toevoegen van de opmerking aan het boek met ISBN", isbn);
     };
   };
 
-  getRequest.onerror = function(event) {
+  getRequest.onerror = function (event) {
     console.error("Fout bij het ophalen van het boek met ISBN", isbn);
   };
 
-  transaction.oncomplete = function(event) {
+  transaction.oncomplete = function (event) {
     console.log("Transactie voltooid.");
   };
 
-  transaction.onerror = function(event) {
+  transaction.onerror = function (event) {
     console.error("Fout bij het uitvoeren van de transactie.");
   };
 }
