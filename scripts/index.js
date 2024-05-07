@@ -47,21 +47,21 @@ function loadBooks() {
           <div id="modal${bookInfo.isbn}" class="modal">
             <div class="modal-content">
               <h4>Commentaar</h4>
-              <form>
+              <form id="form${bookInfo.isbn}">
                 <div class="input-field">
-                  <input id="modal-text-input" type="text" class="validate">
-                  <label for="modal-text-input">Enter Text</label>
+                  <input id="modal-text-input${bookInfo.isbn}" type="text" class="validate">
+                  <label for="modal-text-input${bookInfo.isbn}">Enter Text</label>
                 </div>
               </form>
             </div>
             <div class="modal-footer">
-              <button id="modal-submit-btn" class="modal-close waves-effect waves-green btn" onclick="addComment">Submit</button>
+            <button id="modal-submit-btn${bookInfo.isbn}" class="modal-close waves-effect waves-green btn" onclick="addComment(${bookInfo.isbn});">Plaats commentaar</button>
             </div>
           </div>
           
           <div class="card horizontal">
               <div class="card-image">
-                  <img id="bookThumbnail" src="${bookInfo.thumbnail.replace("-S", "-M")}">
+                  <img id="bookThumbnail" alt="bookThumbnail" src="${bookInfo.thumbnail.replace("-S", "-M")}">
               </div>
               <div class="card-stacked">
                   <div class="card-content">
@@ -70,6 +70,7 @@ function loadBooks() {
                           <li>${bookInfo.author}</li>
                           <li>${bookInfo.publishDate}</li>
                       </ul>
+                      <p>${bookInfo.comment}</p>
                   </div>
                   <div class="card-action">
                     <button data-target="modal${bookInfo.isbn}" class="btn waves-effect waves-light modal-trigger" name="action">Comment
@@ -85,5 +86,42 @@ function loadBooks() {
       var elems = document.querySelectorAll('.modal');
       var instances = M.Modal.init(elems);
     }
+  };
+}
+
+function addComment(isbn) {
+  var textin = document.getElementById('modal-text-input' + isbn.toString()).value;
+
+  const transaction = db.transaction([storeName], "readwrite");
+  const objectStore = transaction.objectStore(storeName);
+
+  const getRequest = objectStore.get(isbn.toString());
+
+  getRequest.onsuccess = function(event) {
+    const book = event.target.result;
+    console.log(book);
+    book.comment = textin;
+    const updateRequest = objectStore.put(book);
+
+    updateRequest.onsuccess = function(event) {
+      console.log("Opmerking toegevoegd aan het boek met ISBN", isbn);
+      window.location.reload();
+    };
+
+    updateRequest.onerror = function(event) {
+      console.error("Fout bij het toevoegen van de opmerking aan het boek met ISBN", isbn);
+    };
+  };
+
+  getRequest.onerror = function(event) {
+    console.error("Fout bij het ophalen van het boek met ISBN", isbn);
+  };
+
+  transaction.oncomplete = function(event) {
+    console.log("Transactie voltooid.");
+  };
+
+  transaction.onerror = function(event) {
+    console.error("Fout bij het uitvoeren van de transactie.");
   };
 }
