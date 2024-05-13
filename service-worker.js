@@ -1,5 +1,5 @@
-const STATIC_CACHE_NAME = "static-version-1";
-const DYNAMIC_CACHE_NAME = "dynamic-version-1";
+const STATIC_CACHE_NAME = "static-version-2";
+const DYNAMIC_CACHE_NAME = "dynamic-version-2";
 
 // Array met alle static files die gecached moeten worden.
 const staticFiles = [

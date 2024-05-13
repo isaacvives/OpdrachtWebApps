@@ -71,6 +71,8 @@ function loadBooks() {
     if (cursor) {
       const bookInfo = cursor.value;
       const bookListDiv = document.getElementById('bookList');
+      const isnt = document.getElementById('instructies');
+      isnt.setAttribute("style", "display: none;")
       const cardDiv = document.createElement('div');
       cardDiv.className = 'col s12 m7';
       cardDiv.innerHTML = `
@@ -86,7 +88,7 @@ function loadBooks() {
               </form>
             </div>
             <div class="modal-footer">
-            <button id="modal-submit-btn${bookInfo.isbn}" class="modal-close waves-effect waves-green btn" onclick="addComment(${bookInfo.isbn});">Plaats commentaar</button>
+            <button id="modal-submit-btn${bookInfo.isbn}" class="modal-close waves-effect waves-light red btn" onclick="addComment(${bookInfo.isbn});">Plaats commentaar</button>
             </div>
           </div>
           
@@ -104,7 +106,7 @@ function loadBooks() {
                       <p>${bookInfo.comment}</p>
                   </div>
                   <div class="card-action">
-                    <button data-target="modal${bookInfo.isbn}" class="btn waves-effect waves-light modal-trigger" name="action">Comment
+                    <button data-target="modal${bookInfo.isbn}" class="btn waves-effect waves-light red modal-trigger" name="action">Comment
                       <i class="material-icons right">edit</i>
                     </button>
                   </div>
